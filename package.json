@@ -1,0 +1,21 @@
+{
+  "name": "blockchain-demo",
+  "version": "1.0.0",
+  "description": "blockchain-demo",
+  "scripts": {
+    "start": "nodemon src/Index.ts",
+    "build": "tsc",
+    "test:unit": "jest --config jest.json --watchAll --coverage"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.19",
+    "@types/node": "^12.11.6",
+    "jest": "^24.9.0",
+    "nodemon": "^1.19.4",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.0",
+    "tslint-config-airbnb": "^5.11.2",
+    "typescript": "^3.6.4"
+  }
+}

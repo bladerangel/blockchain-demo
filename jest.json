@@ -1,0 +1,9 @@
+{
+  "transform": {
+    "^.+\\.tsx?$": "ts-jest"
+  },
+  "coverageDirectory": "<rootDir>/tests/unit/coverage",
+  "testMatch": ["<rootDir>/tests/unit/specs/**/*.spec.(js|jsx|ts|tsx)"],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "transformIgnorePatterns": ["/node_modules/"]
+}
