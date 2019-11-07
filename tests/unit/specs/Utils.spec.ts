@@ -27,8 +27,8 @@ describe('Tests in blockchain class', () => {
   test('Should calculate valid hash', () => {
     const spyRandom = jest.spyOn(Math, 'random');
     spyRandom.mockReturnValueOnce(0);
-    const spyGetTimestamp = jest.spyOn(Utils, 'getTimestamp');
-    spyGetTimestamp.mockReturnValueOnce(0);
+    const spyGetTime = jest.spyOn(Date.prototype, 'getTime');
+    spyGetTime.mockReturnValueOnce(0);
     const nonce = Utils.generateNonce(10000, 99999);
     const hash = Utils.calculateHash(
       0,
