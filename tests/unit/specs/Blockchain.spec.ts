@@ -1,11 +1,10 @@
 import Blockchain from '../../../src/Blockchain';
-import Utils from '../../../src/Utils';
 import Block from '../../../src/Block';
 
 describe('Tests in blockchain class', () => {
   let blockchain: Blockchain;
 
-  beforeAll(() => {
+  beforeEach(() => {
     blockchain = new Blockchain();
   });
 
@@ -23,32 +22,53 @@ describe('Tests in blockchain class', () => {
   });
 
   test('Should add a new block', () => {
-    const lastBlock = jest.spyOn(Blockchain.prototype, 'lastBlock');
-    lastBlock.mockReturnValueOnce(
-      new Block(
-        0,
-        10000,
-        '0000000000000000000000000000000000000000000000000000000000000000',
-        'b0bd9595c9d97aa4e39ebb977ea4e312afe920af4a32f5cb3468e0146c13c311',
-        'genesis block',
-        0,
-      ),
-    );
-    const spyGenerateNonce = jest.spyOn(Utils, 'generateNonce');
-    spyGenerateNonce.mockReturnValueOnce(10000);
-    const spyGetTimestamp = jest.spyOn(Utils, 'getTimestamp');
-    spyGetTimestamp.mockReturnValueOnce(0);
-    blockchain.addBlock('new block');
+    blockchain.addBlock(new Block(0, 0, '', '', '', 0));
     expect(blockchain.blocks).toHaveLength(2);
 
-    const block = blockchain.blocks[1];
-    expect(block.index).toBe(1);
-    expect(block.nonce).toBe(10000);
-    expect(block.previousHash).toBe(blockchain.lastBlock().previousHash);
-    expect(block.hash).toBe(
-      'c7b1d427475397dc8ed90f5c9a2a3d6d476abbee5ef87f05b6e342f52db2b665',
-    );
-    expect(block.data).toBe('new block');
+    const block = blockchain.lastBlock();
+    expect(block.index).toBe(0);
+    expect(block.nonce).toBe(0);
+    expect(block.previousHash).toBe('');
+    expect(block.hash).toBe('');
+    expect(block.data).toBe('');
     expect(block.timestamp).toBe(0);
+  });
+
+  describe('Tests in isValidNextBlock method', () => {
+    test('Should validate next block', () => {
+      const genesisBlock = blockchain.lastBlock();
+      blockchain.addBlock(blockchain.generateNextBlock('new block'));
+      expect(
+        blockchain.isValidNextBlock(genesisBlock, blockchain.lastBlock()),
+      ).toBeTruthy();
+    });
+
+    test('Should not validate next block', () => {
+      const genesisBlock = blockchain.lastBlock();
+      blockchain.addBlock(new Block(0, 0, 'new block', '', '', 0));
+      expect(
+        blockchain.isValidNextBlock(genesisBlock, blockchain.lastBlock()),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('Tests in mine method', () => {
+    test('Should mine the next block', () => {
+      const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
+      blockchain.mine('new block');
+      expect(spyAddBlock).toHaveBeenCalled();
+    });
+
+    test('Should not mine the next block', () => {
+      const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
+      const spyGenerateNextBlock = jest.spyOn(blockchain, 'generateNextBlock');
+      spyGenerateNextBlock.mockReturnValueOnce(
+        new Block(0, 0, 'new block', '', '', 0),
+      );
+      expect(spyAddBlock).not.toHaveBeenCalled();
+      expect(() => {
+        blockchain.mine('new block');
+      }).toThrow();
+    });
   });
 });

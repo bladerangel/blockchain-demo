@@ -27,8 +27,7 @@ export default class Blockchain {
     return this.blocks[this.blocks.length - 1];
   }
 
-  addBlock(data: any) {
-    /* if (this.isValidNextBlock(newBlock, this.latestBlock)) {*/
+  generateNextBlock(data: any): Block {
     const lastBlock = this.lastBlock();
     const index = lastBlock.index + 1;
     const nonce = Utils.generateNonce(10000, 99999);
@@ -41,31 +40,43 @@ export default class Blockchain {
       data,
       timestamp,
     );
-    this.blocks.push(
-      new Block(index, nonce, previousHash, hash, data, timestamp),
-    );
-    /*} else {
-      throw 'Error: Invalid block';
-    }*/
+    return new Block(index, nonce, previousHash, hash, data, timestamp);
   }
-  /*
-  isValidNextBlock(nextBlock: Block, previousBlock: Block) {
-    const nextBlockHash = this.calculateHashForBlock(nextBlock);
 
-    if (previousBlock.index + 1 !== nextBlock.index) {
-      return false;
-    }
-    if (previousBlock.hash !== nextBlock.previousHash) {
-      return false;
-    }
-    if (nextBlockHash !== nextBlock.hash) {
-      return false;
-    }
-    if (!this.isValidHashDifficulty(nextBlockHash)) {
-      return false;
-    }
-    return true;
+  addBlock(block: Block) {
+    this.blocks.push(block);
   }
+
+  isValidNextBlock(previousBlock: Block, nextBlock: Block) {
+    const { index, previousHash, timestamp, data, nonce } = nextBlock;
+    const nextBlockHash = Utils.calculateHash(
+      index,
+      nonce,
+      previousHash,
+      data,
+      timestamp,
+    );
+
+    if (
+      previousBlock.index + 1 === nextBlock.index &&
+      previousBlock.hash === nextBlock.previousHash &&
+      nextBlockHash === nextBlock.hash
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  mine(data: any) {
+    const nextBlock = this.generateNextBlock(data);
+    if (this.isValidNextBlock(this.lastBlock(), nextBlock)) {
+      this.addBlock(nextBlock);
+    } else {
+      throw 'Error: Invalid block';
+    }
+  }
+
+  /*
 
   isValidChain(chain: Block[]) {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) {
