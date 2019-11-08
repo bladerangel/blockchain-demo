@@ -83,16 +83,4 @@ export default class Blockchain {
       }
     });
   }
-  /*
-  isChainLonger(chain: Block[]) {
-    return chain.length > this.blockchain.length;
-  }
-
-  replaceChain(newChain: Block[]) {
-    if (this.isValidChain(newChain) && this.isChainLonger(newChain)) {
-      this.blockchain = JSON.parse(JSON.stringify(newChain));
-    } else {
-      throw 'Error: invalid chain';
-    }
-  }*/
 }
