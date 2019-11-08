@@ -2,9 +2,9 @@ import Block from './Block';
 import Utils from './Utils';
 
 export default class Blockchain {
-  public blocks: Block[];
+  public chain: Block[];
   constructor() {
-    this.blocks = [this.genesisBlock()];
+    this.chain = [this.genesisBlock()];
   }
 
   genesisBlock(): Block {
@@ -24,7 +24,7 @@ export default class Blockchain {
   }
 
   lastBlock(): Block {
-    return this.blocks[this.blocks.length - 1];
+    return this.chain[this.chain.length - 1];
   }
 
   generateNextBlock(data: any): Block {
@@ -44,7 +44,7 @@ export default class Blockchain {
   }
 
   addBlock(block: Block) {
-    this.blocks.push(block);
+    this.chain.push(block);
   }
 
   isValidNextBlock(previousBlock: Block, nextBlock: Block) {

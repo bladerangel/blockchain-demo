@@ -10,12 +10,12 @@ describe('Tests in blockchain class', () => {
   });
 
   test('Should start with real genesis block when instantiating blockchain', () => {
-    const block = blockchain.blocks[0];
-    expect(blockchain.blocks).toHaveLength(1);
+    const block = blockchain.chain[0];
+    expect(blockchain.chain).toHaveLength(1);
     expect(block.index).toBe(0);
     expect(block.nonce.toString()).toHaveLength(5);
     expect(block.previousHash).toBe(
-      '0000000000000000000000000000000000000000000000000000000000000000',
+      '0000000000000000000000000000000000000000000000000000000000000000'
     );
     expect(block.hash).toHaveLength(64);
     expect(block.data).toBe('genesis block');
@@ -54,7 +54,7 @@ describe('Tests in blockchain class', () => {
     test('Should add a new mock block', () => {
       const mockBlock = Data.block();
       blockchain.addBlock(mockBlock);
-      expect(blockchain.blocks).toHaveLength(2);
+      expect(blockchain.chain).toHaveLength(2);
 
       const lastBlock = blockchain.lastBlock();
       expect(lastBlock).toEqual(mockBlock);
@@ -63,7 +63,7 @@ describe('Tests in blockchain class', () => {
     test('Should add a new real block', () => {
       const nextBlock = blockchain.generateNextBlock('new block');
       blockchain.addBlock(nextBlock);
-      expect(blockchain.blocks).toHaveLength(2);
+      expect(blockchain.chain).toHaveLength(2);
 
       const lastBlock = blockchain.lastBlock();
       expect(lastBlock).toEqual(nextBlock);
