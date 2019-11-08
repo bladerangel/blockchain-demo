@@ -76,24 +76,14 @@ export default class Blockchain {
     }
   }
 
-  /*
-
   isValidChain(chain: Block[]) {
-    if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) {
-      return false;
-    }
-
-    const tempChain = [chain[0]];
-    for (let i = 1; i < chain.length; i = i + 1) {
-      if (this.isValidNextBlock(chain[i], tempChain[i - 1])) {
-        tempChain.push(chain[i]);
-      } else {
-        return false;
+    return chain.some((block, index, blocks) => {
+      if (blocks.length !== index + 1) {
+        return this.isValidNextBlock(block, blocks[index + 1]);
       }
-    }
-    return true;
+    });
   }
-
+  /*
   isChainLonger(chain: Block[]) {
     return chain.length > this.blockchain.length;
   }

@@ -15,7 +15,7 @@ describe('Tests in blockchain class', () => {
     expect(block.index).toBe(0);
     expect(block.nonce.toString()).toHaveLength(5);
     expect(block.previousHash).toBe(
-      '0000000000000000000000000000000000000000000000000000000000000000'
+      '0000000000000000000000000000000000000000000000000000000000000000',
     );
     expect(block.hash).toHaveLength(64);
     expect(block.data).toBe('genesis block');
@@ -142,6 +142,23 @@ describe('Tests in blockchain class', () => {
       expect(() => {
         blockchain.mine(mockBlock.data);
       }).toThrow();
+    });
+  });
+
+  describe('Tests in isValidChain method', () => {
+    test('Should validate mock chain', () => {
+      const mockChain = Data.chain();
+      expect(blockchain.isValidChain(mockChain)).toBeTruthy();
+    });
+
+    test('Should validate real chain', () => {
+      blockchain.mine('new block');
+      expect(blockchain.isValidChain(blockchain.chain)).toBeTruthy();
+    });
+
+    test('Should not validate fail mock chain', () => {
+      const failMockChain = Data.failChain();
+      expect(blockchain.isValidChain(failMockChain)).toBeFalsy();
     });
   });
 });

@@ -32,4 +32,12 @@ export default class Data {
       0,
     );
   }
+
+  static chain(): Block[] {
+    return [this.genesisBlock(), this.block()];
+  }
+
+  static failChain(): Block[] {
+    return [this.genesisBlock(), this.failBlock()];
+  }
 }
