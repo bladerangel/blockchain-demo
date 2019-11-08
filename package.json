@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "blockchain-demo",
   "scripts": {
-    "start": "nodemon src/Index.ts",
     "build": "tsc",
     "test:unit": "jest --config jest.json --watchAll --coverage"
   },
