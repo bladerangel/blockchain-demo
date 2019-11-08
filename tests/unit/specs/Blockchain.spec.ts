@@ -1,5 +1,6 @@
 import Blockchain from '../../../src/Blockchain';
-import Block from '../../../src/Block';
+import Utils from '../../../src/Utils';
+import Data from '../mocks/Data';
 
 describe('Tests in blockchain class', () => {
   let blockchain: Blockchain;
@@ -8,7 +9,7 @@ describe('Tests in blockchain class', () => {
     blockchain = new Blockchain();
   });
 
-  test('Should start with block genesis when instantiating blockchain', () => {
+  test('Should start with real genesis block when instantiating blockchain', () => {
     const block = blockchain.blocks[0];
     expect(blockchain.blocks).toHaveLength(1);
     expect(block.index).toBe(0);
@@ -21,53 +22,125 @@ describe('Tests in blockchain class', () => {
     expect(block.timestamp).not.toBeNaN();
   });
 
-  test('Should add a new block', () => {
-    blockchain.addBlock(new Block(0, 0, '', '', '', 0));
-    expect(blockchain.blocks).toHaveLength(2);
+  describe('Tests in generateNextBlock method', () => {
+    test('Should generate next mock block', () => {
+      const mockBlock = Data.block();
+      const mockGenesisBlock = Data.genesisBlock();
+      const spyLastBlock = jest.spyOn(blockchain, 'lastBlock');
+      spyLastBlock.mockReturnValueOnce(mockGenesisBlock);
+      const spyGenerateNonce = jest.spyOn(Utils, 'generateNonce');
+      spyGenerateNonce.mockReturnValueOnce(mockBlock.nonce);
+      const spyHash = jest.spyOn(Utils, 'calculateHash');
+      spyHash.mockReturnValueOnce(mockBlock.hash);
+      const spyGetTimestamp = jest.spyOn(Utils, 'getTimestamp');
+      spyGetTimestamp.mockReturnValueOnce(mockBlock.timestamp);
 
-    const block = blockchain.lastBlock();
-    expect(block.index).toBe(0);
-    expect(block.nonce).toBe(0);
-    expect(block.previousHash).toBe('');
-    expect(block.hash).toBe('');
-    expect(block.data).toBe('');
-    expect(block.timestamp).toBe(0);
+      const nextBlock = blockchain.generateNextBlock(mockBlock.data);
+      expect(nextBlock).toEqual(mockBlock);
+    });
+
+    test('Should generate next real block', () => {
+      const nextBlock = blockchain.generateNextBlock('new block');
+      expect(nextBlock.index).toBe(1);
+      expect(nextBlock.nonce.toString()).toHaveLength(5);
+      expect(nextBlock.previousHash).toHaveLength(64);
+      expect(nextBlock.hash).toHaveLength(64);
+      expect(nextBlock.data).toBe('new block');
+      expect(nextBlock.timestamp).not.toBeNaN();
+    });
+  });
+
+  describe('Tests in addBlock method', () => {
+    test('Should add a new mock block', () => {
+      const mockBlock = Data.block();
+      blockchain.addBlock(mockBlock);
+      expect(blockchain.blocks).toHaveLength(2);
+
+      const lastBlock = blockchain.lastBlock();
+      expect(lastBlock).toEqual(mockBlock);
+    });
+
+    test('Should add a new real block', () => {
+      const nextBlock = blockchain.generateNextBlock('new block');
+      blockchain.addBlock(nextBlock);
+      expect(blockchain.blocks).toHaveLength(2);
+
+      const lastBlock = blockchain.lastBlock();
+      expect(lastBlock).toEqual(nextBlock);
+    });
   });
 
   describe('Tests in isValidNextBlock method', () => {
-    test('Should validate next block', () => {
-      const genesisBlock = blockchain.lastBlock();
-      blockchain.addBlock(blockchain.generateNextBlock('new block'));
+    test('Should validate genesis mock block and next mock block', () => {
+      const mockGenesisBlock = Data.genesisBlock();
+      const mockBlock = Data.block();
       expect(
-        blockchain.isValidNextBlock(genesisBlock, blockchain.lastBlock()),
+        blockchain.isValidNextBlock(mockGenesisBlock, mockBlock),
       ).toBeTruthy();
     });
 
-    test('Should not validate next block', () => {
+    test('Should validate genesis real block and next real block', () => {
       const genesisBlock = blockchain.lastBlock();
-      blockchain.addBlock(new Block(0, 0, 'new block', '', '', 0));
+      const nextBlock = blockchain.generateNextBlock('new block');
+      expect(blockchain.isValidNextBlock(genesisBlock, nextBlock)).toBeTruthy();
+    });
+
+    test('Should not validate genesis mock block and next fail mock block', () => {
+      const mockGenesisBlock = Data.genesisBlock();
+      const failMockBlock = Data.failBlock();
       expect(
-        blockchain.isValidNextBlock(genesisBlock, blockchain.lastBlock()),
+        blockchain.isValidNextBlock(mockGenesisBlock, failMockBlock),
       ).toBeFalsy();
+    });
+
+    test('Should not validate genesis real block and next mock block', () => {
+      const genesisBlock = blockchain.lastBlock();
+      const mockBlock = Data.block();
+      expect(blockchain.isValidNextBlock(genesisBlock, mockBlock)).toBeFalsy();
     });
   });
 
   describe('Tests in mine method', () => {
-    test('Should mine the next block', () => {
+    test('Should mine the genesis mock block and next real block', () => {
+      const mockGenesisBlock = Data.genesisBlock();
+      const mockBlock = Data.block();
+      const spyGenerateNextBlock = jest.spyOn(blockchain, 'generateNextBlock');
+      const spyLastBlock = jest.spyOn(blockchain, 'lastBlock');
+      const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
+      spyGenerateNextBlock.mockReturnValueOnce(mockBlock);
+      spyLastBlock.mockReturnValueOnce(mockGenesisBlock);
+      blockchain.mine(mockBlock.data);
+      expect(spyAddBlock).toHaveBeenCalled();
+    });
+
+    test('Should mine the genesis real block and next real block', () => {
       const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
       blockchain.mine('new block');
       expect(spyAddBlock).toHaveBeenCalled();
     });
 
-    test('Should not mine the next block', () => {
-      const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
+    test('Should not mine the genesis mock block and next fail mock block', () => {
+      const mockGenesisBlock = Data.genesisBlock();
+      const failMockBlock = Data.failBlock();
       const spyGenerateNextBlock = jest.spyOn(blockchain, 'generateNextBlock');
-      spyGenerateNextBlock.mockReturnValueOnce(
-        new Block(0, 0, 'new block', '', '', 0),
-      );
+      const spyLastBlock = jest.spyOn(blockchain, 'lastBlock');
+      const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
+      spyGenerateNextBlock.mockReturnValueOnce(failMockBlock);
+      spyLastBlock.mockReturnValueOnce(mockGenesisBlock);
       expect(spyAddBlock).not.toHaveBeenCalled();
       expect(() => {
-        blockchain.mine('new block');
+        blockchain.mine(failMockBlock.data);
+      }).toThrow();
+    });
+
+    test('Should not mine the genesis real block and next mock block', () => {
+      const mockBlock = Data.block();
+      const spyAddBlock = jest.spyOn(blockchain, 'addBlock');
+      const spyGenerateNextBlock = jest.spyOn(blockchain, 'generateNextBlock');
+      spyGenerateNextBlock.mockReturnValueOnce(mockBlock);
+      expect(spyAddBlock).not.toHaveBeenCalled();
+      expect(() => {
+        blockchain.mine(mockBlock.data);
       }).toThrow();
     });
   });
