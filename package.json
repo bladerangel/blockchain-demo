@@ -2,7 +2,9 @@
   "name": "blockchain-demo",
   "version": "1.0.0",
   "description": "blockchain-demo",
+  "main": "dist/Index.js",
   "scripts": {
+    "preinstall": "npm run build",
     "build": "tsc",
     "test:unit": "jest --config jest.json --watchAll --coverage"
   },
